@@ -1,0 +1,49 @@
+{
+  "name": "aws-testing-framework-test",
+  "version": "1.0.0",
+  "description": "Example project demonstrating different usage patterns for the AWS Testing Framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:builtin": "cucumber-js -c cucumber-builtin.js",
+    "test:custom-steps": "cucumber-js -c cucumber-custom.js",
+    "test:extend-steps": "cucumber-js -c cucumber-extend.js",
+    "test:feature-only": "cucumber-js -c cucumber-feature-only.js",
+    "test:all": "cucumber-js features/",
+    "build": "tsc",
+    "clean": "rm -rf dist reports"
+  },
+  "keywords": [
+    "aws",
+    "testing",
+    "examples",
+    "cucumber",
+    "bdd",
+    "serverless",
+    "integration-tests",
+    "aws-testing-framework"
+  ],
+  "author": "Sophie Gle",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sophiegle/aws-testing-framework-test.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sophiegle/aws-testing-framework-test/issues"
+  },
+  "homepage": "https://github.com/sophiegle/aws-testing-framework-test#readme",
+  "dependencies": {
+    "@types/node": "^24.0.3",
+    "aws-testing-framework": "^0.1.5",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.3.0",
+    "assert": "^2.1.0",
+    "ts-node": "^10.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

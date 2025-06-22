@@ -1,0 +1,27 @@
+Feature: Extended Framework Testing
+  As a developer
+  I want to extend the framework's built-in steps
+  So that I can add custom validation and logging
+
+  Background:
+    Given I have an S3 bucket named "my-example-bucket"
+    And I have a Lambda function named "my-example-lambda"
+    And I have a Step Function named "my-example-step-function"
+
+  Scenario: Test extended S3 upload with custom validation
+    When I upload a file "extended-test.json" with content '{"extended": "test"}' to the S3 bucket
+    Then the file should be uploaded with enhanced metadata
+    And the file should be validated against custom business rules
+    And the Lambda function should be invoked with extended context
+
+  Scenario: Test extended Lambda execution with custom monitoring
+    When I upload a file "monitoring-test.json" with content '{"monitoring": "test"}' to the S3 bucket
+    Then the Lambda function should be invoked with enhanced logging
+    And the Lambda execution should include custom business context
+    And the Lambda logs should contain extended metadata
+
+  Scenario: Test extended Step Function execution
+    When I upload a file "step-function-test.json" with content '{"stepFunction": "test"}' to the S3 bucket
+    Then the Step Function should be executed with custom parameters
+    And the Step Function execution should include business context
+    And the Step Function should complete with enhanced monitoring
