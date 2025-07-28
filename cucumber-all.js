@@ -8,10 +8,10 @@ module.exports = {
       'node_modules/aws-testing-framework/dist/steps/sqs-steps.js',
       'node_modules/aws-testing-framework/dist/steps/correlation-steps.js',
       'node_modules/aws-testing-framework/dist/steps/monitoring-steps.js',
-      'src/steps/debug-steps.ts'
+      'src/steps/feature-only-steps.ts'
     ],
     format: ['progress', 'html:reports/cucumber-report.html'],
     formatOptions: { snippetInterface: 'async-await' },
-    paths: ['features/builtin-methods.feature']
+    paths: ['features/feature-only.feature']
   }
 }; 
