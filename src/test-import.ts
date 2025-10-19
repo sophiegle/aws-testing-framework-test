@@ -8,18 +8,25 @@ async function testLibraryImport() {
     const framework = new AWSTestingFramework();
     console.log('✅ Framework instantiated successfully');
     
-    // Test basic methods
-    const correlationId = framework.generateCorrelationId();
-    console.log(`✅ Generated correlation ID: ${correlationId}`);
+    // Test service access
+    const s3Service = framework.s3Service;
+    const lambdaService = framework.lambdaService;
+    const sqsService = framework.sqsService;
+    const stepFunctionService = framework.stepFunctionService;
+    const healthValidator = framework.healthValidator;
+    console.log('✅ All services accessible');
     
-    // Test reporter configuration
-    framework.configureReporter('./test-reports');
-    const reporter = framework.getReporter();
-    console.log('✅ Reporter configured successfully');
+    // Test reporter access
+    const reporter = framework.reporter;
+    console.log('✅ Reporter accessible');
     
-    // Test cleanup
-    await framework.cleanup();
-    console.log('✅ Cleanup completed successfully');
+    // Test configuration access
+    const config = framework.getConfig();
+    console.log('✅ Configuration accessible');
+    
+    // Test cleanup (dispose)
+    await framework.dispose();
+    console.log('✅ Framework disposed successfully');
     
     console.log('🎉 All basic functionality tests passed!');
     

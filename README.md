@@ -2,6 +2,14 @@
 
 This repository demonstrates how to use the [aws-testing-framework](https://www.npmjs.com/package/aws-testing-framework) package with different usage patterns for testing AWS serverless architectures.
 
+> **📦 Framework Version:** This project uses `aws-testing-framework` v0.6.1 (upgraded from v0.2.0)
+> 
+> **🔄 Breaking Changes:** Version 0.6.1 introduced significant API changes including:
+> - Simplified initialization with dependency injection
+> - Step definitions now registered through a single support file
+> - Methods moved from framework to respective service classes
+> - `waitForCondition` moved to `HealthValidator` service
+
 ## Overview
 
 The `aws-testing-framework` is a BDD testing framework for AWS services and their interactions. This example project shows four different ways to use the framework:
@@ -13,7 +21,7 @@ The `aws-testing-framework` is a BDD testing framework for AWS services and thei
 
 ## Prerequisites
 
-- Node.js 18+ 
+- Node.js 20.16.0+ 
 - AWS CLI configured with appropriate permissions
 - AWS resources deployed (S3 bucket, Lambda function, Step Function, SQS queue)
 
@@ -37,12 +45,7 @@ module.exports = {
   default: {
     requireModule: ['ts-node/register'],
     require: [
-      'node_modules/aws-testing-framework/dist/steps/s3-steps.js',
-      'node_modules/aws-testing-framework/dist/steps/lambda-steps.js',
-      'node_modules/aws-testing-framework/dist/steps/step-function-steps.js',
-      'node_modules/aws-testing-framework/dist/steps/sqs-steps.js',
-      'node_modules/aws-testing-framework/dist/steps/correlation-steps.js',
-      'node_modules/aws-testing-framework/dist/steps/monitoring-steps.js'
+      'features/step_definitions/framework-support.ts'
     ],
     format: ['progress', 'html:reports/cucumber-report.html'],
     formatOptions: { snippetInterface: 'async-await' },
@@ -50,6 +53,8 @@ module.exports = {
   }
 };
 ```
+
+The framework now uses a simplified setup with a single support file that initializes all built-in step definitions using dependency injection.
 
 **Run tests:**
 ```bash
@@ -158,9 +163,8 @@ module.exports = {
   default: {
     requireModule: ['ts-node/register'],
     require: [
-      'node_modules/aws-testing-framework/dist/steps/s3-steps.js',
-      'node_modules/aws-testing-framework/dist/steps/lambda-steps.js',
-      'node_modules/aws-testing-framework/dist/steps/step-function-steps.js'
+      'features/step_definitions/framework-support.ts',
+      'src/steps/feature-only-steps.ts'
     ],
     format: ['progress', 'html:reports/cucumber-report.html'],
     formatOptions: { snippetInterface: 'async-await' },

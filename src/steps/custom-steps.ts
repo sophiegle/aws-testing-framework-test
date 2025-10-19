@@ -1,14 +1,12 @@
-import { Given, Then, When, setDefaultTimeout } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { AWSTestingFramework, type StepContext } from 'aws-testing-framework';
-
-// Set default timeout to 60 seconds for all steps
-setDefaultTimeout(60000);
 
 const framework = new AWSTestingFramework();
 const s3Service = framework.s3Service;
 const lambdaService = framework.lambdaService;
 const sqsService = framework.sqsService;
-const stepFunctionService = framework.stepFunctionService;  
+const stepFunctionService = framework.stepFunctionService;
+const healthValidator = framework.healthValidator;  
 
 // Custom context interface for business-specific data
 interface CustomStepContext extends StepContext {
@@ -125,14 +123,14 @@ Then(
     const endTime = new Date();
 
     // Check if Lambda has been executed recently
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function has not been executed recently');
     }
 
     // Get execution count
-    const executionCount = await framework.countLambdaExecutions(this.functionName, startTime, endTime);
+    const executionCount = await lambdaService.countLambdaExecutions(this.functionName, startTime, endTime);
     
     if (executionCount === 0) {
       throw new Error('No Lambda executions found in the specified time period');
@@ -169,11 +167,11 @@ Then(
     const endTime = new Date();
 
     // Get Lambda logs to check for error handling
-    const logs = await framework.getLambdaLogs(this.functionName, startTime, endTime);
+    const logs = await lambdaService.getLambdaLogs(this.functionName, startTime, endTime);
     
     // Check for proper error handling patterns
     const errorHandlingPatterns = ['try', 'catch', 'finally', 'error handling'];
-    const hasErrorHandling = logs.some(log => 
+    const hasErrorHandling = logs.some((log: string) => 
       errorHandlingPatterns.some(pattern => log.toLowerCase().includes(pattern))
     );
 
@@ -192,7 +190,7 @@ Then(
     }
 
     // Check if Lambda has been executed recently
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function has not been executed recently');
@@ -367,7 +365,7 @@ Then(
       throw new Error('Lambda function name is not set');
     }
 
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Data was not processed by the Lambda function');
@@ -447,7 +445,7 @@ Then(
     const startTime = new Date(Date.now() - 60000);
     const endTime = new Date();
     
-    const logs = await framework.getLambdaLogs(this.functionName, startTime, endTime);
+    const logs = await lambdaService.getLambdaLogs(this.functionName, startTime, endTime);
     
     if (logs.length > 0) {
       console.log('Error logged for debugging');
@@ -465,9 +463,9 @@ Then(
       throw new Error('Lambda function name is not set');
     }
     
-    await framework.waitForCondition(async () => {
+    await healthValidator.waitForCondition(async () => {
       if (!this.functionName) return false;
-      const actualCount = await framework.countLambdaExecutionsInLastMinutes(
+      const actualCount = await lambdaService.countLambdaExecutionsInLastMinutes(
         this.functionName,
         minutes
       );
@@ -487,7 +485,7 @@ Then(
     }
 
     // Check if Lambda has been executed recently (indicates monitoring is working)
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     console.log('Monitoring and alerting verified: Lambda execution tracking is operational');
   }

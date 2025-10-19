@@ -2,13 +2,17 @@ import { Given, Then, When } from '@cucumber/cucumber';
 import { AWSTestingFramework, type StepContext } from 'aws-testing-framework';
 
 const framework = new AWSTestingFramework();
+const s3Service = framework.s3Service;
+const lambdaService = framework.lambdaService;
+const stepFunctionService = framework.stepFunctionService;
+const healthValidator = framework.healthValidator;
 
 // Background step definitions - using unique patterns
 Given(
   'I have a feature-only S3 bucket named {string}',
   async function (this: StepContext, bucketName: string) {
     this.bucketName = bucketName;
-    await framework.s3Service.findBucket(bucketName);
+    await s3Service.findBucket(bucketName);
   }
 );
 
@@ -16,7 +20,7 @@ Given(
   'I have a feature-only Lambda function named {string}',
   async function (this: StepContext, functionName: string) {
     this.functionName = functionName;
-    await framework.lambdaService.findFunction(functionName);
+    await lambdaService.findFunction(functionName);
   }
 );
 
@@ -24,7 +28,7 @@ Given(
   'I have a feature-only Step Function named {string}',
   async function (this: StepContext, stateMachineName: string) {
     this.stateMachineName = stateMachineName;
-    await framework.stepFunctionService.findStateMachine(stateMachineName);
+    await stepFunctionService.findStateMachine(stateMachineName);
   }
 );
 
@@ -36,7 +40,7 @@ When(
       throw new Error('Bucket name is not set');
     }
     
-    await framework.s3Service.uploadFile(this.bucketName, fileName, content);
+    await s3Service.uploadFile(this.bucketName, fileName, content);
   }
 );
 
@@ -62,7 +66,7 @@ When(
     ];
     
     for (const file of files) {
-      await framework.s3Service.uploadFile(this.bucketName, file.name, file.content);
+      await s3Service.uploadFile(this.bucketName, file.name, file.content);
       await new Promise(resolve => setTimeout(resolve, 100));
     }
   }
@@ -76,8 +80,8 @@ Then(
       throw new Error('Bucket name is not set');
     }
     
-    await framework.waitForCondition(async () => {
-      return await framework.s3Service.checkFileExists(this.bucketName!, fileName);
+    await healthValidator.waitForCondition(async () => {
+      return await s3Service.checkFileExists(this.bucketName!, fileName);
     }, 30000);
   }
 );
@@ -90,9 +94,9 @@ Then(
       throw new Error('Lambda function name is not set');
     }
     
-    await framework.waitForCondition(async () => {
+    await healthValidator.waitForCondition(async () => {
       if (!this.functionName) return false;
-      return await framework.checkLambdaExecution(this.functionName);
+      return await lambdaService.checkLambdaExecution(this.functionName);
     }, 30000);
   }
 );
@@ -105,7 +109,7 @@ Then(
       throw new Error('Lambda function name is not set');
     }
     
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function has not processed the file');
@@ -123,7 +127,7 @@ Then(
       throw new Error('Lambda function name is not set');
     }
     
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('File was not processed by the Lambda function');
@@ -144,10 +148,10 @@ Then(
     const startTime = new Date(Date.now() - 60000);
     const endTime = new Date();
     
-    const logs = await framework.getLambdaLogs(this.functionName, startTime, endTime);
+    const logs = await lambdaService.getLambdaLogs(this.functionName, startTime, endTime);
     
     const errorIndicators = ['ERROR', 'Exception', 'Error:', 'FAILED'];
-    const hasErrors = logs.some(log => 
+    const hasErrors = logs.some((log: string) => 
       errorIndicators.some(indicator => log.includes(indicator))
     );
     
@@ -171,7 +175,7 @@ Then(
     const resultFiles = ['results.json', 'output.json', 'processed-data.json'];
     
     for (const fileName of resultFiles) {
-      const exists = await framework.s3Service.checkFileExists(this.bucketName, fileName);
+      const exists = await s3Service.checkFileExists(this.bucketName, fileName);
       if (exists) {
         console.log(`Results found in ${fileName}`);
         return;
@@ -191,7 +195,7 @@ Then(
     }
     
     // Check if Lambda function is accessible (graceful handling)
-    await framework.lambdaService.findFunction(this.functionName);
+    await lambdaService.findFunction(this.functionName);
     
     console.log('Lambda function handles errors gracefully');
   }
@@ -208,7 +212,7 @@ Then(
     const startTime = new Date(Date.now() - 60000);
     const endTime = new Date();
     
-    const logs = await framework.getLambdaLogs(this.functionName, startTime, endTime);
+    const logs = await lambdaService.getLambdaLogs(this.functionName, startTime, endTime);
     
     if (logs.length > 0) {
       console.log('Error logging is operational');
@@ -227,7 +231,7 @@ Then(
     }
     
     // Verify S3 bucket is still accessible
-    await framework.s3Service.findBucket(this.bucketName);
+    await s3Service.findBucket(this.bucketName);
     
     console.log('System continues to function normally');
   }
@@ -241,9 +245,9 @@ Then(
       throw new Error('Lambda function name is not set');
     }
     
-    await framework.waitForCondition(async () => {
+    await healthValidator.waitForCondition(async () => {
       if (!this.functionName) return false;
-      const actualCount = await framework.countLambdaExecutionsInLastMinutes(
+      const actualCount = await lambdaService.countLambdaExecutionsInLastMinutes(
         this.functionName,
         minutes
       );
@@ -266,14 +270,14 @@ Then(
     const endTime = new Date();
     
     // Check if Lambda has been executed recently
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function has not been executed recently');
     }
     
     // Get execution count
-    const executionCount = await framework.countLambdaExecutions(this.functionName, startTime, endTime);
+    const executionCount = await lambdaService.countLambdaExecutions(this.functionName, startTime, endTime);
     
     if (executionCount === 0) {
       throw new Error('No Lambda executions found in the specified time period');
@@ -292,7 +296,7 @@ Then(
     }
     
     // Check if Step Function exists and is accessible
-    await framework.stepFunctionService.findStateMachine(this.stateMachineName);
+    await stepFunctionService.findStateMachine(this.stateMachineName);
     
     console.log(`Step Function ${this.stateMachineName} is accessible and ready for execution`);
   }
@@ -307,7 +311,7 @@ Then(
     }
     
     // Check if Step Function exists and is accessible
-    await framework.stepFunctionService.findStateMachine(this.stateMachineName);
+    await stepFunctionService.findStateMachine(this.stateMachineName);
     
     console.log(`Step Function ${this.stateMachineName} is accessible and meets basic SLA requirements`);
   }
@@ -328,7 +332,7 @@ When(
     ];
     
     for (const file of files) {
-      await framework.s3Service.uploadFile(
+      await s3Service.uploadFile(
         this.bucketName!,
         file.name,
         file.content
@@ -351,7 +355,7 @@ Then(
     const files = ['file1.json', 'file2.json', 'file3.json'];
     
     for (const fileName of files) {
-      const exists = await framework.s3Service.checkFileExists(this.bucketName!, fileName);
+      const exists = await s3Service.checkFileExists(this.bucketName!, fileName);
       
       if (!exists) {
         throw new Error(`File ${fileName} was not found in the S3 bucket`);
@@ -374,11 +378,11 @@ Then(
     const endTime = new Date();
     
     // Get Lambda logs
-    const logs = await framework.getLambdaLogs(this.functionName, startTime, endTime);
+    const logs = await lambdaService.getLambdaLogs(this.functionName, startTime, endTime);
     
     // Check for error indicators in logs
     const errorIndicators = ['ERROR', 'Exception', 'Error:', 'FAILED'];
-    const hasErrors = logs.some(log => 
+    const hasErrors = logs.some((log: string) => 
       errorIndicators.some(indicator => log.includes(indicator))
     );
     
@@ -399,7 +403,7 @@ Then(
     }
     
     // Check if Step Function exists and is accessible
-    await framework.stepFunctionService.findStateMachine(this.stateMachineName);
+    await stepFunctionService.findStateMachine(this.stateMachineName);
     
     console.log(`Step Function ${this.stateMachineName} has a valid definition`);
   }

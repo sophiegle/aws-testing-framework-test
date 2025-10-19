@@ -1,4 +1,4 @@
-import { Given, Then, When, setDefaultTimeout } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { AWSTestingFramework, type StepContext } from 'aws-testing-framework';
 
 declare module 'aws-testing-framework' {
@@ -7,12 +7,12 @@ declare module 'aws-testing-framework' {
   }
 }
 
-setDefaultTimeout(60000);
 const framework = new AWSTestingFramework();
 const s3Service = framework.s3Service;
 const lambdaService = framework.lambdaService;
 const sqsService = framework.sqsService;
 const stepFunctionService = framework.stepFunctionService;
+const healthValidator = framework.healthValidator;
 
 // Extended context interface for custom functionality
 interface ExtendedStepContext extends StepContext {
@@ -99,7 +99,7 @@ Then(
     }
 
     // Verify file exists (using built-in method)
-    await framework.waitForCondition(async () => {
+    await healthValidator.waitForCondition(async () => {
       return await s3Service.checkFileExists(this.bucketName!, this.uploadedFileName!);
     });
 
@@ -127,7 +127,7 @@ Then(
     }
 
     // Check if Lambda has been executed recently
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function has not been executed recently');
@@ -149,7 +149,7 @@ Then(
     const endTime = new Date();
 
     // Get execution count for performance analysis
-    const executionCount = await framework.countLambdaExecutions(this.functionName, startTime, endTime);
+    const executionCount = await lambdaService.countLambdaExecutions(this.functionName, startTime, endTime);
     
     if (executionCount === 0) {
       throw new Error('No Lambda executions found for performance benchmarking');
@@ -171,11 +171,11 @@ Then(
     const endTime = new Date();
 
     // Get Lambda logs to check for advanced error handling
-    const logs = await framework.getLambdaLogs(this.functionName, startTime, endTime);
+    const logs = await lambdaService.getLambdaLogs(this.functionName, startTime, endTime);
     
     // Check for advanced error handling patterns
     const advancedErrorPatterns = ['try', 'catch', 'finally', 'error handling', 'retry'];
-    const hasAdvancedErrorHandling = logs.some(log => 
+    const hasAdvancedErrorHandling = logs.some((log: string) => 
       advancedErrorPatterns.some(pattern => log.toLowerCase().includes(pattern))
     );
 
@@ -194,7 +194,7 @@ Then(
     }
 
     // Check if Lambda has been executed recently
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function has not been executed recently');
@@ -274,7 +274,7 @@ Then(
     }
 
     // Check if Lambda has been executed recently
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function has not been executed recently');
@@ -323,7 +323,7 @@ Then(
     }
 
     // Check if Lambda has been executed recently
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function has not been executed recently');
@@ -358,7 +358,7 @@ Then(
       throw new Error('Lambda function name is not set');
     }
 
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function was not invoked with extended context');
@@ -376,7 +376,7 @@ Then(
       throw new Error('Lambda function name is not set');
     }
 
-    const hasExecutions = await framework.checkLambdaExecution(this.functionName);
+    const hasExecutions = await lambdaService.checkLambdaExecution(this.functionName);
     
     if (!hasExecutions) {
       throw new Error('Lambda function was not invoked with enhanced logging');
@@ -413,7 +413,7 @@ Then(
     const startTime = new Date(Date.now() - 60000);
     const endTime = new Date();
     
-    const logs = await framework.getLambdaLogs(this.functionName, startTime, endTime);
+    const logs = await lambdaService.getLambdaLogs(this.functionName, startTime, endTime);
     
     if (logs.length > 0) {
       console.log('Lambda logs contain extended metadata');
@@ -481,9 +481,9 @@ Then(
       throw new Error('Lambda function name is not set');
     }
     
-    await framework.waitForCondition(async () => {
+    await healthValidator.waitForCondition(async () => {
       if (!this.functionName) return false;
-      const actualCount = await framework.countLambdaExecutionsInLastMinutes(
+      const actualCount = await lambdaService.countLambdaExecutionsInLastMinutes(
         this.functionName,
         minutes
       );
@@ -523,8 +523,8 @@ Given('I have a Step Function named {string}', async function (this: StepContext
 Then('the Lambda function should be invoked', async function (this: StepContext) {
   // Extended: call built-in logic, then add custom check/log
   if (!this.functionName) throw new Error('Lambda function name is not set');
-  await framework.waitForCondition(async () => {
-    return await framework.checkLambdaExecution(this.functionName!);
+  await healthValidator.waitForCondition(async () => {
+    return await lambdaService.checkLambdaExecution(this.functionName!);
   }, 30000);
   // Custom extension: log or add extra validation
   console.log(`[EXTEND] Lambda function ${this.functionName} was invoked (extended check)`);
