@@ -193,7 +193,59 @@ npm run test:feature-only   # Feature-only pattern
 # Build and clean
 npm run build
 npm run clean
+
+# Allure Reports (requires Java)
+npm run allure:generate     # Generate Allure HTML report
+npm run allure:open         # Open generated report in browser
+npm run allure:serve        # Generate and serve report (opens automatically)
+npm run test:allure         # Run tests and open report
 ```
+
+## Allure Reporting
+
+This project includes [Allure Report](https://allurereport.org/docs/cucumberjs/) integration for beautiful, interactive test reports.
+
+### Prerequisites
+
+Allure requires **Java** to be installed. Install it using:
+
+**macOS:**
+```bash
+brew install openjdk
+```
+
+**Linux:**
+```bash
+sudo apt-get install openjdk-11-jre
+```
+
+**Windows:**
+Download from [java.com](https://www.java.com)
+
+### Viewing Reports
+
+After running tests, Allure results are automatically saved to `allure-results/`.
+
+**Option 1: Quick serve (generates and opens automatically)**
+```bash
+npm run allure:serve
+```
+
+**Option 2: Generate static HTML report**
+```bash
+npm run allure:generate
+npm run allure:open
+```
+
+### Report Features
+
+Allure reports include:
+- ✅ Test execution history and trends
+- ✅ Test duration and performance metrics  
+- ✅ Detailed step-by-step execution
+- ✅ Categories for passed/failed/skipped tests
+- ✅ Timeline view of test execution
+- ✅ Beautiful, shareable HTML reports
 
 ## Project Structure
 

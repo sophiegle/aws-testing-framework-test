@@ -8,8 +8,15 @@ module.exports = {
       'node_modules/aws-testing-framework/dist/framework/steps/SQSSteps.js',
       'node_modules/aws-testing-framework/dist/framework/steps/StepFunctionSteps.js'
     ],
-    format: ['progress', 'html:reports/cucumber-report.html'],
-    formatOptions: { snippetInterface: 'async-await' },
+    format: [
+      'progress',
+      'html:reports/cucumber-report.html',
+      'allure-cucumberjs/reporter'
+    ],
+    formatOptions: { 
+      snippetInterface: 'async-await',
+      resultsDir: 'allure-results'
+    },
     paths: ['features/builtin-methods.feature']
   }
 }; 

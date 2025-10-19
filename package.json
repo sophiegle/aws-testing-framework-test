@@ -13,7 +13,11 @@
     "test:all": "cucumber-js features/",
     "test:all-with-custom": "cucumber-js -c cucumber-all.js",
     "build": "tsc",
-    "clean": "rm -rf dist reports"
+    "clean": "rm -rf dist reports allure-results allure-report",
+    "allure:generate": "export PATH=\"/opt/homebrew/opt/openjdk@11/bin:$PATH\" && allure generate allure-results --clean -o allure-report",
+    "allure:open": "export PATH=\"/opt/homebrew/opt/openjdk@11/bin:$PATH\" && allure open allure-report",
+    "allure:serve": "export PATH=\"/opt/homebrew/opt/openjdk@11/bin:$PATH\" && allure serve allure-results",
+    "test:allure": "npm test && npm run allure:open"
   },
   "keywords": [
     "aws",
@@ -47,6 +51,9 @@
   },
   "devDependencies": {
     "@cucumber/cucumber": "^11.3.0",
+    "@cucumber/messages": "^30.1.0",
+    "allure-commandline": "^2.34.1",
+    "allure-cucumberjs": "^3.4.1",
     "assert": "^2.1.0",
     "ts-node": "^10.9.2"
   },

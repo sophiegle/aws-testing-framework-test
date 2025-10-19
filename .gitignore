@@ -13,6 +13,9 @@ build/
 reports/
 coverage/
 .nyc_output/
+allure-results/
+allure-report/
+.allure/
 
 # Environment variables
 .env
