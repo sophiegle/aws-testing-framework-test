@@ -12,12 +12,7 @@
     "test:simple": "cucumber-js -c cucumber-simple.js",
     "test:all": "cucumber-js features/",
     "test:all-with-custom": "cucumber-js -c cucumber-all.js",
-    "build": "tsc",
-    "clean": "rm -rf dist reports allure-results allure-report",
-    "allure:generate": "export PATH=\"/opt/homebrew/opt/openjdk@11/bin:$PATH\" && allure generate allure-results --clean -o allure-report",
-    "allure:open": "export PATH=\"/opt/homebrew/opt/openjdk@11/bin:$PATH\" && allure open allure-report",
-    "allure:serve": "export PATH=\"/opt/homebrew/opt/openjdk@11/bin:$PATH\" && allure serve allure-results",
-    "test:allure": "npm test && npm run allure:open"
+    "build": "tsc"
   },
   "keywords": [
     "aws",
@@ -40,11 +35,6 @@
   },
   "homepage": "https://github.com/sophiegle/aws-testing-framework-test#readme",
   "dependencies": {
-    "@aws-sdk/client-cloudwatch-logs": "^3.855.0",
-    "@aws-sdk/client-lambda": "^3.855.0",
-    "@aws-sdk/client-s3": "^3.855.0",
-    "@aws-sdk/client-sfn": "^3.855.0",
-    "@aws-sdk/client-sqs": "^3.855.0",
     "@types/node": "^24.0.3",
     "aws-testing-framework": "^0.6.1",
     "typescript": "^5.8.3"
@@ -52,8 +42,7 @@
   "devDependencies": {
     "@cucumber/cucumber": "^11.3.0",
     "@cucumber/messages": "^30.1.0",
-    "allure-commandline": "^2.34.1",
-    "allure-cucumberjs": "^3.4.1",
+    "allure-cucumberjs": "^3.4.2",
     "assert": "^2.1.0",
     "ts-node": "^10.9.2"
   },
